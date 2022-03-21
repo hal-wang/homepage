@@ -9,14 +9,6 @@ const home: RouteRecordRaw[] = [
       title: '主页',
     },
   },
-  {
-    path: '/second',
-    name: 'SecondPage',
-    component: () => import('/@/views/home/SecondPage.vue'),
-    meta: {
-      title: '第二个页面',
-    },
-  },
 ];
 
 export default home;
