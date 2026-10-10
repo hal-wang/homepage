@@ -1,13 +1,127 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" href="/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Hal Wang</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link id="favicon" rel="shortcut icon" href="./favicon.ico" />
+<title>H</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; overflow: hidden; }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: sans-serif;
+    transition: background 0.5s ease;
+  }
+  /* 浏览器浅色主题 */
+  body { background: linear-gradient(135deg, #e3f2fd 0%, #c5cae9 100%); }
+  /* 浏览器深色主题 */
+  @media (prefers-color-scheme: dark) {
+    body { background: linear-gradient(135deg, #0d1b2a 0%, #1b263b 100%); }
+  }
+  .stage {
+    width: min(80vw, 80vh);
+    height: min(80vw, 80vh);
+    position: relative;
+  }
+  svg { width: 100%; height: 100%; display: block; }
+</style>
+</head>
+<body>
+<div class="stage">
+  <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- 阴影 -->
+    <g opacity="0.18">
+      <rect x="52" y="34" width="80" height="332" rx="36" fill="#888"/>
+      <rect x="268" y="34" width="80" height="332" rx="36" fill="#888"/>
+      <rect x="52" y="160" width="296" height="80" rx="36" fill="#888"/>
+    </g>
+    <!-- 左竖 -->
+    <rect x="48" y="28" width="80" height="332" rx="36" fill="#1976d2"/>
+    <!-- 右竖 -->
+    <rect x="272" y="28" width="80" height="332" rx="36" fill="#1976d2"/>
+    <!-- 横杠（脸） -->
+    <rect x="48" y="156" width="304" height="88" rx="40" fill="#42a5f5"/>
+    <!-- 高光 -->
+    <rect x="56" y="36" width="20" height="180" rx="10" fill="#ffffff" opacity="0.3"/>
+    <rect x="280" y="36" width="20" height="180" rx="10" fill="#ffffff" opacity="0.3"/>
+
+    <!-- 左眼眼白 -->
+    <circle cx="150" cy="200" r="26" fill="#ffffff"/>
+    <!-- 右眼眼白 -->
+    <circle cx="250" cy="200" r="26" fill="#ffffff"/>
+
+    <!-- 左眼瞳孔组（整体移动） -->
+    <g id="leftEye">
+      <circle cx="150" cy="200" r="12" fill="#2c2c2c"/>
+      <circle cx="146" cy="196" r="4" fill="#ffffff"/>
+    </g>
+    <!-- 右眼瞳孔组（整体移动） -->
+    <g id="rightEye">
+      <circle cx="250" cy="200" r="12" fill="#2c2c2c"/>
+      <circle cx="246" cy="196" r="4" fill="#ffffff"/>
+    </g>
+  </svg>
+</div>
+
+<script>
+  const stage = document.querySelector('.stage');
+  const eyes = [
+    { cx: 150, cy: 200, el: document.getElementById('leftEye') },
+    { cx: 250, cy: 200, el: document.getElementById('rightEye') }
+  ];
+
+  let mouseX = window.innerWidth / 2;
+  let mouseY = window.innerHeight / 2;
+  let stageRect = stage.getBoundingClientRect();
+  let rafId = null;
+
+  window.addEventListener('resize', () => {
+    stageRect = stage.getBoundingClientRect();
+  });
+
+  function updateEyes() {
+    rafId = null;
+    const scale = 400 / stageRect.width;
+    const mx = (mouseX - stageRect.left) * scale;
+    const my = (mouseY - stageRect.top) * scale;
+
+    eyes.forEach(eye => {
+      const dx = mx - eye.cx;
+      const dy = my - eye.cy;
+      const angle = Math.atan2(dy, dx);
+      const maxOffset = 12;
+      const dist = Math.min(maxOffset, Math.hypot(dx, dy) / 6);
+      const ox = Math.cos(angle) * dist;
+      const oy = Math.sin(angle) * dist;
+      eye.el.setAttribute('transform', `translate(${ox} ${oy})`);
+    });
+  }
+
+  function scheduleUpdate() {
+    if (rafId === null) {
+      rafId = requestAnimationFrame(updateEyes);
+    }
+  }
+
+  window.addEventListener('mousemove', e => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    scheduleUpdate();
+  });
+
+  window.addEventListener('touchmove', e => {
+    if (e.touches[0]) {
+      mouseX = e.touches[0].clientX;
+      mouseY = e.touches[0].clientY;
+      scheduleUpdate();
+    }
+  }, { passive: true });
+
+  // 初始看向屏幕中心
+  updateEyes();
+</script>
+</body>
 </html>
